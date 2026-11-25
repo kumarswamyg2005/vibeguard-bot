@@ -1,0 +1,23 @@
+name: ci
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync
+      - run: uv run ruff check vibeguard/ tests/
+      - run: uv run mypy --strict vibeguard/scanner/ vibeguard/fixer/
+      - run: uv run pytest
+      - uses: supabase/setup-cli@v1
+      - run: supabase start
+      - run: supabase test db

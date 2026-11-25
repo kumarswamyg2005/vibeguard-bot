@@ -1,0 +1,56 @@
+{% extends "base.html.j2" %}
+{% block body %}
+<section>
+  <h1>A security engineer for your Supabase app.</h1>
+  <p class="sub">Checks every push. Opens small fixes with a test. Opt-in.</p>
+</section>
+
+<section class="cols">
+  <div>
+    <h2>What it checks</h2>
+    <ul>
+      <li>tables without RLS</li>
+      <li>secret keys in client code</li>
+      <li>write-anything policies</li>
+      <li>public storage buckets</li>
+      <li>unsafe security-definer functions</li>
+    </ul>
+  </div>
+  <div>
+    <h2>What it never does</h2>
+    <ul>
+      <li>read your data</li>
+      <li>write to your database</li>
+      <li>touch repos you didn't pick</li>
+      <li>use a leaked key it finds</li>
+      <li>open guessed fixes</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>Example fix PR</h2>
+  <p class="small">A real rendered PR body — every fix ships with the same shape: what an attacker can do, a proof you can run, the change, a test, and a way to undo.</p>
+  <pre>Anyone on the internet can read and write every row in
+`posts` right now.
+
+## Prove it yourself (30 seconds)
+
+curl -sI "https://yourapp.supabase.co/rest/v1/posts?select=*" \
+  -H "apikey: <your anon key>" \
+  -H "Prefer: count=exact" -H "Range: 0-0" | grep -i content-range
+
+## What this PR changes
+- supabase/migrations/…_vibeguard_rls_posts.sql
+- supabase/tests/vibeguard_posts.test.sql
+
+## How to test
+supabase start && supabase test db</pre>
+</section>
+
+<section>
+  <a class="btn" href="{{ install_url }}">Install</a>
+  <p class="small" style="margin-top:12px">Installs on the repos you choose. A config PR arrives within 15 minutes. Uninstall any time — your findings are deleted after 30 days.</p>
+  <p class="small"><a href="{{ root }}scoreboard/">Scoreboard</a></p>
+</section>
+{% endblock %}

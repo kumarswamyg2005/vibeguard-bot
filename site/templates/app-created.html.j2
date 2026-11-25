@@ -1,0 +1,22 @@
+{% extends "base.html.j2" %}
+{% block title %}App created — VibeGuard Bot{% endblock %}
+{% block body %}
+<section>
+  <h1>Copy this code into Devin:</h1>
+  <pre id="code" style="margin:16px 0">Loading…</pre>
+  <button class="btn" id="copy" type="button">Copy</button>
+  <p class="small" style="margin-top:16px">If the code didn't appear, check that this page's URL ends with <code>?code=…</code>.</p>
+</section>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var code = params.get('code') || '(no code in URL)';
+  document.getElementById('code').textContent = code;
+  document.getElementById('copy').addEventListener('click', function () {
+    navigator.clipboard.writeText(code).then(function () {
+      document.getElementById('copy').textContent = 'Copied';
+    });
+  });
+})();
+</script>
+{% endblock %}

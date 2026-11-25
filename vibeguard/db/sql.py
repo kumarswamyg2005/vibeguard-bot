@@ -9,6 +9,11 @@ import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
+
+def _row(cls, r: dict) -> object:
+    keep = {k: v for k, v in r.items() if k in cls.__dataclass_fields__}
+    return cls(**keep)
+
 from vibeguard.db.store import FindingRow, OutboundRow, RepoRow, TickStats
 from vibeguard.scanner.model import Finding
 
@@ -164,7 +169,7 @@ class SqlStore:
         rows = self._all(
             "select * from findings where repo_id = %s and status = any(%s) order by id",
             (repo_id, list(statuses)))
-        return [FindingRow(**r) for r in rows]
+        return [_row(FindingRow, r) for r in rows]
 
     def set_finding_status(self, finding_id: int, status: str, now: dt.datetime) -> None:
         close = status in ("fixed", "accepted_risk", "false_positive")
@@ -177,7 +182,7 @@ class SqlStore:
     def find_finding(self, repo_id: int, fingerprint: str) -> FindingRow | None:
         row = self._one("select * from findings where repo_id = %s and fingerprint = %s",
                         (repo_id, fingerprint))
-        return FindingRow(**row) if row else None
+        return _row(FindingRow, row) if row else None
 
     # -- outbound ------------------------------------------------------------
 
@@ -211,7 +216,7 @@ class SqlStore:
         return int(row["id"])
 
     def list_open_outbound(self) -> list[OutboundRow]:
-        return [OutboundRow(**{k: v for k, v in r.items() if k in OutboundRow.__dataclass_fields__})
+        return [_row(OutboundRow, r)
                 for r in self._all("select * from outbound where state = 'open'")]
 
     def update_outbound_state(self, outbound_id: int, state: str, now: dt.datetime,
@@ -241,7 +246,7 @@ class SqlStore:
         row = self._one(
             """select f.* from findings f join outbound o on o.finding_id = f.id
                where o.id = %s""", (outbound_id,))
-        return FindingRow(**row) if row else None
+        return _row(FindingRow, row) if row else None
 
     def write_tick_run(self, started: dt.datetime, finished: dt.datetime,
                        stats: TickStats) -> None:

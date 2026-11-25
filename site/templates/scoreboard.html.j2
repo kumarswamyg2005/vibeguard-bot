@@ -1,0 +1,53 @@
+{% extends "base.html.j2" %}
+{% block title %}Scoreboard — VibeGuard Bot{% endblock %}
+{% block body %}
+<section>
+  <h1>Week of {{ current_week }}</h1>
+  {% if has_data %}
+  <div class="figures">
+    <div>
+      <div class="num">{{ current.apps_protected }}</div>
+      <div class="lbl">apps protected</div>
+    </div>
+    <div>
+      <div class="num{% if current.criticals_closed == 0 %} stamp{% endif %}">{{ current.criticals_closed }}</div>
+      <div class="lbl">criticals closed</div>
+    </div>
+    <div>
+      <div class="num">{{ median_fmt }}</div>
+      <div class="lbl">median time to fix</div>
+    </div>
+  </div>
+
+  <table class="scoreboard">
+    <thead><tr><th>week</th><th>apps</th><th>closed</th><th>median</th></tr></thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.week }}</td>
+        <td>{{ row.apps_protected }}</td>
+        <td>{{ row.criticals_closed }}</td>
+        <td>{{ row.median_fmt }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="sub">No apps yet this week.</p>
+  {% endif %}
+</section>
+
+{% if public_repos %}
+<section>
+  <h2>Opted-in public repos</h2>
+  <p class="small">Only repos whose owners set <code>public_on_scoreboard: true</code>.</p>
+  <table class="scoreboard">
+    <tbody>
+      {% for name in public_repos %}
+      <tr><td>{{ name }}</td><td><span class="tag ok">Protected</span></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}

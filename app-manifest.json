@@ -1,0 +1,18 @@
+{
+  "name": "VibeGuard Bot",
+  "url": "https://kumarswamyg2005.github.io/vibeguard-bot/",
+  "hook_attributes": {
+    "url": "https://kumarswamyg2005.github.io/vibeguard-bot/",
+    "active": false
+  },
+  "redirect_url": "https://kumarswamyg2005.github.io/vibeguard-bot/app-created/",
+  "public": true,
+  "default_permissions": {
+    "metadata": "read",
+    "contents": "write",
+    "pull_requests": "write",
+    "issues": "write",
+    "checks": "write"
+  },
+  "default_events": []
+}

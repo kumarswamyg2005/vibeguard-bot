@@ -1,0 +1,32 @@
+name: keepalive
+# scheduled workflows in public repos are disabled after 60 days of repo
+# inactivity; a weekly snapshot commit keeps the schedules alive.
+on:
+  schedule:
+    - cron: "7 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync
+      - name: snapshot scoreboard
+        run: |
+          python -m vibeguard.site.build
+          mkdir -p docs/scoreboard-snapshots
+          cp site/dist/scoreboard.json "docs/scoreboard-snapshots/$(date +%Y-%m-%d).json"
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      - name: commit snapshot
+        run: |
+          git config user.name "vibeguard-bot[bot]"
+          git config user.email "vibeguard-bot[bot]@users.noreply.github.com"
+          git add docs/scoreboard-snapshots
+          git commit -m "scoreboard snapshot $(date +%Y-%m-%d)" || echo "nothing to commit"
+          git push
