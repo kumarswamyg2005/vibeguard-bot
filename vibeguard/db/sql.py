@@ -9,13 +9,13 @@ import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
+from vibeguard.db.store import FindingRow, OutboundRow, RepoRow, TickStats
+from vibeguard.scanner.model import Finding
+
 
 def _row(cls, r: dict) -> object:
     keep = {k: v for k, v in r.items() if k in cls.__dataclass_fields__}
     return cls(**keep)
-
-from vibeguard.db.store import FindingRow, OutboundRow, RepoRow, TickStats
-from vibeguard.scanner.model import Finding
 
 
 class SqlStore:
