@@ -1,0 +1,31 @@
+VibeGuard Bot is now watching this repo. It re-scans within 15 minutes of every push and opens at most one small fix PR at a time — each with a test that proves the fix.
+
+## First scan results
+
+{% if counts -%}
+{% for sev, n in counts.items() if n -%}
+- **{{ n }}** {{ sev }}
+{% endfor -%}
+{% else -%}
+- No findings. Nothing to do.
+{% endif %}
+
+## What this PR adds
+
+`.vibeguard.yml` — your settings:
+
+```yaml
+live_probe: false            # allow harmless HEAD row-count proofs on your own API
+public_on_scoreboard: false  # show this repo's name on the public scoreboard
+```
+
+Both default to off. Change them any time; the next scan picks them up.
+
+## What VibeGuard never does
+
+- It never reads your data — probes are HEAD requests that return only a row count.
+- It never uses a secret/service_role key it finds. It reports them instead.
+- It never touches repos you didn't install it on.
+- It never opens a guessed fix — if a safe fix needs a decision, you get an issue with options.
+
+Merge this to start receiving fix PRs, or close it to opt out (the bot stays installed but quiet).

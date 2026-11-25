@@ -44,7 +44,8 @@ def jwt_role(token: str) -> str | None:
     """Read only the `role` claim. Signature is never verified (by design)."""
     try:
         payload = token.split(".")[1]
-        return json.loads(_b64url_decode(payload)).get("role")
+        role = json.loads(_b64url_decode(payload)).get("role")
+        return str(role) if role is not None else None
     except Exception:  # noqa: BLE001 - malformed token => not our finding
         return None
 

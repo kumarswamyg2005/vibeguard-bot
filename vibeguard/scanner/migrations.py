@@ -78,7 +78,7 @@ def _line_of(sql: str, location: int) -> int:
 def _rel(rel: ast.RangeVar | None) -> tuple[str, str]:
     if rel is None:
         return "public", ""
-    return (rel.schemaname or "public"), rel.relname
+    return (rel.schemaname or "public"), (rel.relname or "")
 
 
 def _const_true(node: Any) -> bool:
@@ -136,8 +136,8 @@ def _owner_col(stmt: ast.CreateStmt, sql: str) -> tuple[str | None, bool]:
                 pk = c.pktable
                 if pk is not None and pk.relname == "users" and (pk.schemaname or "") == "auth":
                     refs = True
-        if not refs and elt.raw_expr is not None:
-            refs = bool(_AUTH_USERS_REF.search(str(elt.raw_expr)))
+        if not refs and elt.typeName is not None:
+            refs = bool(_AUTH_USERS_REF.search(str(elt.typeName)))
         if not refs:
             # crude but useful: look at the CREATE TABLE statement text near the column
             m = re.search(rf"{name}[^,\)]*{_AUTH_USERS_REF.pattern}", sql, re.I)
@@ -231,9 +231,10 @@ def build_catalog(migration_files: list[tuple[str, str]]) -> Catalog:
                     )
                 )
             elif isinstance(stmt, ast.CreateFunctionStmt):
-                names = [n.sval for n in stmt.funcname or () if isinstance(n, ast.String)]
-                schema = names[-2] if len(names) >= 2 else "public"
-                fname = names[-1] if names else ""
+                names = [
+                    n.sval or "" for n in stmt.funcname or () if isinstance(n, ast.String)
+                ]
+                schema, fname = (names[-2:] if len(names) >= 2 else ["public", "unknown"])
                 security_definer = False
                 has_set = False
                 for opt in stmt.options or ():
@@ -284,7 +285,7 @@ def _bucket_inserts(cat: Catalog, stmt: ast.InsertStmt, sql: str, loc: int) -> N
         bid = rowmap.get("id") or rowmap.get("name")
         if _const_true(pub) and isinstance(bid, ast.A_Const):
             v = bid.val
-            if isinstance(v, ast.String):
+            if isinstance(v, ast.String) and v.sval is not None:
                 cat.public_buckets.add(v.sval)
     # fallback for `select ... union` forms
     if not values_lists:

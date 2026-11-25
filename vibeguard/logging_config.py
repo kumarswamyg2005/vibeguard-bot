@@ -83,9 +83,9 @@ def public_log(logger: logging.Logger, **fields: object) -> None:
     for key, value in fields.items():
         if isinstance(value, bool):
             parts.append(f"{key}={int(value)}")
-        elif isinstance(value, int | float):
-            parts.append(f"{key}={value}")
-        elif isinstance(value, str) and re.fullmatch(r"[A-Za-z0-9_.\-]{1,40}", value):
+        elif isinstance(value, int | float) or (
+            isinstance(value, str) and re.fullmatch(r"[A-Za-z0-9_.\-]{1,40}", value)
+        ):
             parts.append(f"{key}={value}")
         else:
             parts.append(f"{key}=?")

@@ -71,13 +71,14 @@ class RateLimiter:
             self.sleep = time.sleep
 
     def wait(self, host: str) -> None:
-        assert self.clock is not None and self.sleep is not None
+        clock = self.clock or time.time
+        sleep = self.sleep or time.sleep
         last = self._last.get(host)
         if last is not None:
-            gap = self.clock() - last
+            gap = clock() - last
             if gap < self.interval:
-                self.sleep(self.interval - gap)
-        self._last[host] = self.clock()
+                sleep(self.interval - gap)
+        self._last[host] = clock()
 
 
 def parse_content_range(value: str | None) -> int | None:

@@ -1,0 +1,38 @@
+{{ impact }}
+
+## Prove it yourself (30 seconds)
+
+{% if proof_curl -%}
+```sh
+{{ proof_curl }}
+```
+The count in `Content-Range` is the number of rows anyone can read right now — no login required.
+{% else -%}
+Open your app in a private browser window and check the network calls: the flagged key/policy is reachable without any login.
+{% endif %}
+
+## What this PR changes
+
+{% for f in files -%}
+- `{{ f }}`
+{% endfor %}
+
+## How to test
+
+```sh
+supabase start && supabase test db
+```
+The included pgTAP test proves anonymous users see zero rows and one user cannot touch another user's data.
+
+## How to undo
+
+Revert this PR's migration file and push. Your app keeps working exactly as before.
+
+---
+
+{% if rotate -%}
+**Rotation required.** A key that was committed to git must be treated as exposed: create a new key in your Supabase dashboard, switch the server to it, then deactivate the old one.
+{% endif -%}
+Reply `/vibeguard accept` if this exposure is intended, or `/vibeguard false-positive` if this report is wrong.
+
+— VibeGuard Bot · automated security review · findings detail is private to you

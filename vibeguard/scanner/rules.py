@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import re
+from collections.abc import Iterator
 from pathlib import Path
 
 from vibeguard.policy import (
@@ -11,7 +12,7 @@ from vibeguard.policy import (
     is_client_reachable,
     key_hash,
 )
-from vibeguard.scanner.migrations import Catalog, build_catalog
+from vibeguard.scanner.migrations import Catalog, PolicyInfo, build_catalog
 from vibeguard.scanner.model import Evidence, Finding, RepoSignals, ScanResult
 from vibeguard.scanner.secrets import KeyHit, scan_text, supabase_url_in
 
@@ -36,7 +37,7 @@ _TEXT_EXTS = {
 _SKIP_DIRS = {"node_modules", ".git", "dist", "build", ".next", ".vercel", "coverage"}
 
 
-def _walk_files(root: Path):
+def _walk_files(root: Path) -> Iterator[tuple[str, Path]]:
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in _SKIP_DIRS]
         for fn in filenames:
@@ -152,7 +153,8 @@ def _rule_secrets(hits: list[KeyHit]) -> list[Finding]:
                 Finding(
                     rule_id="VG001",
                     severity="critical",
-                    fingerprint=Finding.fingerprint_of("VG001", h.file, str(h.line), ev["key_hash"]),
+                    fingerprint=Finding.fingerprint_of(
+                        "VG001", h.file, str(h.line), ev["key_hash"]),
                     evidence=ev,
                     fixable=True,
                     summary="Secret Supabase key is reachable from client code",
@@ -174,7 +176,7 @@ def _rule_secrets(hits: list[KeyHit]) -> list[Finding]:
 
 def _rule_rls(cat: Catalog) -> list[Finding]:
     out: list[Finding] = []
-    policies_by_table: dict[str, list] = {}
+    policies_by_table: dict[str, list[PolicyInfo]] = {}
     for pol in cat.policies:
         policies_by_table.setdefault(f"{pol.table_schema}.{pol.table}", []).append(pol)
 
@@ -259,7 +261,8 @@ def _rule_rls(cat: Catalog) -> list[Finding]:
                 fixable=False,
                 summary=(
                     f"SECURITY DEFINER function {fn.name} "
-                    f"{'without set search_path' if not fn.has_set_search_path else 'still executable by anon'}"
+                    + ("without set search_path" if not fn.has_set_search_path
+                       else "still executable by anon")
                 ),
             )
         )

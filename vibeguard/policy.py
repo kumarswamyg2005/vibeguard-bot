@@ -127,10 +127,7 @@ def is_client_reachable(repo_path: str) -> bool:
     for d in SERVER_ONLY_DIRS:
         if p.startswith(d):
             return False
-    for d in CLIENT_REACHABLE_DIRS:
-        if p.startswith(d):
-            return True
-    return False
+    return any(p.startswith(d) for d in CLIENT_REACHABLE_DIRS)
 
 
 def env_name_is_client_exposed(name: str) -> bool:

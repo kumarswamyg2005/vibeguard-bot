@@ -1,0 +1,11 @@
+{{ impact }}
+
+VibeGuard can't safely guess the right policy for `{{ table }}` because the table has no obvious ownership column (`user_id`, `owner_id`, … referencing `auth.users`). Pick one:
+
+1. **Public read-only** — the data is meant for everyone. Reply `/vibeguard accept` and we'll stop flagging reads. If writes also need locking, say so.
+2. **Add an owner column** — if rows belong to users, we can open a PR that adds `user_id uuid references auth.users` plus owner policies.
+3. **Admin-only** — no direct table access at all; everything goes through your backend. We'll open a PR enabling RLS with no policies.
+
+Reply with the option number, or `/vibeguard false-positive` if this report is wrong.
+
+— VibeGuard Bot · this issue is visible only to people who can see this repo
