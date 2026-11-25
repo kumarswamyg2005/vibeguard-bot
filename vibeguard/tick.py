@@ -423,6 +423,10 @@ def main() -> None:  # pragma: no cover - exercised by the Actions workflow
     from vibeguard.logging_config import configure_logging
 
     logger = configure_logging()
+    required = ("GH_APP_ID", "GH_APP_PRIVATE_KEY", "SUPABASE_DB_URL")
+    if any(not os.environ.get(k) for k in required):
+        public_log(logger, tick=1, skipped=1, reason="no_credentials")
+        return
     pem = os.environ["GH_APP_PRIVATE_KEY"]
     if "BEGIN" not in pem:
         pem = base64.b64decode(pem).decode()
